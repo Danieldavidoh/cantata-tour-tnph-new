@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cantata Tour</title>
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #f8f9fa; }
+    .app { padding: 20px; max-width: 600px; margin: auto; }
+    h1 { color: #007bff; text-align: center; }
+    .tour-card { background: white; border-radius: 10px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer; }
+    .tour-card:hover { transform: scale(1.02); }
+    button { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div id="root" class="app">
+    <h1>🎉 안녕! Cantata Tour 앱이야!</h1>
+    <p>폰 홈 화면에 추가하고 여행 가자! 🚀✈️</p>
+    <h2>🔥 추천 투어 (클릭해봐!)</h2>
+    <div class="tour-card" onclick="alert('🌴 제주도 투어 ₩500,000 예약할까?')">
+      <h3>🌴 제주도 투어</h3>
+      <p>₩500,000</p>
+      <button onclick="alert('제주도 예약 완료! 🎉')">예약하기</button>
+    </div>
+    <div class="tour-card" onclick="alert('🏙️ 서울 시티 투어 ₩100,000 예약할까?')">
+      <h3>🏙️ 서울 시티 투어</h3>
+      <p>₩100,000</p>
+      <button onclick="alert('서울 예약 완료! 🎉')">예약하기</button>
+    </div>
+    <div class="tour-card" onclick="alert('🌊 부산 바다 투어 ₩300,000 예약할까?')">
+      <h3>🌊 부산 바다 투어</h3>
+      <p>₩300,000</p>
+      <button onclick="alert('부산 예약 완료! 🎉')">예약하기</button>
+    </div>
+  </div>
+  <script>
+    // PWA 설치 제안
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      deferredPrompt = e;
+    });
+  </script>
+</body>
+</html>
