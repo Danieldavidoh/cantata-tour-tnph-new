@@ -3,43 +3,117 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cantata Tour</title>
-  <link rel="manifest" href="/manifest.json">
+  <title>🎼 Cantata Tour (Maharashtra)</title>
+  <link rel="manifest" href="manifest.json">
+  <!-- Leaflet 지도 (unpkg CDN – 가장 안정적, integrity 제거) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
-    body { margin: 0; font-family: sans-serif; background: #f8f9fa; }
-    .app { padding: 20px; max-width: 600px; margin: auto; }
-    h1 { color: #007bff; text-align: center; }
-    .tour-card { background: white; border-radius: 10px; padding: 20px; margin: 10px 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); cursor: pointer; }
-    .tour-card:hover { transform: scale(1.02); }
-    button { background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+    body { margin: 0; font-family: 'Malgun Gothic', sans-serif; background: #f8f9fa; }
+    .container { max-width: 800px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #1a73e8; }
+    h2 { color: #28a745; }
+    select, input, button { margin: 5px 0; padding: 10px; border-radius: 8px; border: 1px solid #ddd; width: 100%; box-sizing: border-box; }
+    button { background: #1a73e8; color: white; cursor: pointer; font-weight: bold; }
+    button:hover { background: #0d47a1; }
+    .route { font-weight: bold; color: #d32f2f; font-size: 1.1rem; }
+    .map { height: 400px; margin: 20px 0; border-radius: 10px; border: 1px solid #ddd; }
+    .venue { background: #e8f5e9; padding: 10px; margin: 5px 0; border-radius: 8px; }
+    #install-btn { background: #4caf50; width: 100%; margin: 15px 0; font-size: 1.1rem; display: none; }
+    .city-block { border: 1px solid #ddd; margin: 15px 0; padding: 15px; border-radius: 10px; background: #f9f9f9; }
+    .travel-info { text-align: center; color: #666; font-style: italic; margin: 5px 0; }
+    .lang-selector { text-align: center; margin: 10px 0; }
+    .lang-text { display: none; }
+    .lang-text.ko { display: block; }
+    .error { color: red; text-align: center; padding: 20px; }
   </style>
 </head>
 <body>
-  <div id="root" class="app">
-    <h1>🎉 안녕! Cantata Tour 앱이야!</h1>
-    <p>폰 홈 화면에 추가하고 여행 가자! 🚀✈️</p>
-    <h2>🔥 추천 투어 (클릭해봐!)</h2>
-    <div class="tour-card" onclick="alert('🌴 제주도 투어 ₩500,000 예약할까?')">
-      <h3>🌴 제주도 투어</h3>
-      <p>₩500,000</p>
-      <button onclick="alert('제주도 예약 완료! 🎉')">예약하기</button>
+  <div class="container">
+    <!-- 언어 선택기 -->
+    <div class="lang-selector">
+      <label>🌐 Language: </label>
+      <select id="langSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="ko" selected>한국어</option>
+        <option value="hi">हिन्दी</option>
+      </select>
     </div>
-    <div class="tour-card" onclick="alert('🏙️ 서울 시티 투어 ₩100,000 예약할까?')">
-      <h3>🏙️ 서울 시티 투어</h3>
-      <p>₩100,000</p>
-      <button onclick="alert('서울 예약 완료! 🎉')">예약하기</button>
-    </div>
-    <div class="tour-card" onclick="alert('🌊 부산 바다 투어 ₩300,000 예약할까?')">
-      <h3>🌊 부산 바다 투어</h3>
-      <p>₩300,000</p>
-      <button onclick="alert('부산 예약 완료! 🎉')">예약하기</button>
+
+    <h1 class="lang-text en">🎼 Cantata Tour <small>(Maharashtra)</small></h1>
+    <h1 class="lang-text ko">🎼 칸타타 투어 <small>(마하라슈트라)</small></h1>
+    <h1 class="lang-text hi">🎼 कांताता टूर <small>(महाराष्ट्र)</small></h1>
+    
+    <p class="lang-text en" style="text-align:center; color:#555;">Mobile: ⋮ → 'Add to Home Screen' → Use like an app!</p>
+    <p class="lang-text ko" style="text-align:center; color:#555;">모바일: ⋮ → '홈 화면에 추가' → 앱처럼 사용!</p>
+    <p class="lang-text hi" style="text-align:center; color:#555;">मोबाइल: ⋮ → 'होम स्क्रीन पर जोड़ें' → ऐप की तरह उपयोग करें!</p>
+    
+    <button id="install-btn" class="lang-text en" style="display:none;">📱 Install as App</button>
+    <button id="install-btn-ko" class="lang-text ko" style="display:none;">📱 앱으로 설치하기</button>
+    <button id="install-btn-hi" class="lang-text hi" style="display:none;">📱 ऐप के रूप में इंस्टॉल करें</button>
+
+    <select id="startCity"></select>
+    <button onclick="startTour()">🚀 Start</button>
+    <button onclick="resetAll()">🔄 Reset All</button>
+
+    <div id="routeSection" style="display:none; margin-top:20px;">
+      <select id="nextCity"></select>
+      <button onclick="addCity()">➕ Add</button>
+      <p><strong class="lang-text en">Current Route:</strong><strong class="lang-text ko">현재 경로:</strong><strong class="lang-text hi">वर्तमान मार्ग:</strong> <span id="routeDisplay" class="route"></span></p>
+      <p class="lang-text en">Total Distance: <span id="totalDist">0</span> km | Total Time: <span id="totalTime">0</span> h</p>
+      <p class="lang-text ko">총 거리: <span id="totalDist">0</span> km | 총 시간: <span id="totalTime">0</span> h</p>
+      <p class="lang-text hi">कुल दूरी: <span id="totalDist">0</span> km | कुल समय: <span id="totalTime">0</span> h</p>
+
+      <div id="cityList"></div>
+      <h2 class="lang-text en">Tour Map</h2><h2 class="lang-text ko">투어 지도</h2><h2 class="lang-text hi">टूर मैप</h2>
+      <div id="map" class="map"></div>
+      <p id="map-error" class="error" style="display:none;">지도 로드 실패! 새로고침 해봐.</p>
     </div>
   </div>
+
+  <!-- 데이터와 로직 -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+
+  <!-- 다국어 & PWA & 지도 에러 핸들링 -->
   <script>
-    // PWA 설치 제안
+    const LANG = {
+      "en": { "install": "Install as App" },
+      "ko": { "install": "앱으로 설치하기" },
+      "hi": { "install": "ऐप के रूप में इंस्टॉल करें" }
+    };
+    let currentLang = 'ko';
+
+    function changeLanguage(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-text').forEach(el => {
+        el.style.display = el.classList.contains(lang) ? 'block' : 'none';
+      });
+      updateSelects();
+    }
+
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
       deferredPrompt = e;
+      document.querySelectorAll('[id^="install-btn"]').forEach(btn => btn.style.display = 'block';
+    });
+    document.querySelectorAll('[id^="install-btn"]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(() => deferredPrompt = null);
+          btn.style.display = 'none';
+        }
+      });
+    });
+
+    // 지도 로드 실패 시 메시지 (fallback 추가)
+    window.addEventListener('load', () => {
+      if (!window.L || !L.map) {
+        document.getElementById('map-error').innerHTML = '지도 로드 실패! <a href="javascript:location.reload()">새로고침</a> 해봐.';
+        document.getElementById('map-error').style.display = 'block';
+      }
     });
   </script>
 </body>
